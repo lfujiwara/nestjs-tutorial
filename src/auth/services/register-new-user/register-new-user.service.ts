@@ -2,6 +2,7 @@ import * as Joi from 'joi';
 
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from '../../../core/user';
+import { RegisterNewUserServiceError } from './register-new-user.service.errors';
 
 type RegisterNewUserServiceRequest = {
   username: string;
@@ -44,11 +45,15 @@ export class RegisterNewUserService {
     Joi.assert(request, RegisterNewUserServiceRequestSchema);
 
     if (await this.emailIsAlreadyRegistered(request.email)) {
-      throw new Error(RegisterNewUserServiceErrors.EMAIL_ALREADY_REGISTERED);
+      throw new RegisterNewUserServiceError(
+        RegisterNewUserServiceErrors.EMAIL_ALREADY_REGISTERED,
+      );
     }
 
     if (await this.usernameIsAlreadyRegistered(request.username)) {
-      throw new Error(RegisterNewUserServiceErrors.USERNAME_ALREADY_REGISTERED);
+      throw new RegisterNewUserServiceError(
+        RegisterNewUserServiceErrors.USERNAME_ALREADY_REGISTERED,
+      );
     }
 
     const user = await User.create(request);
