@@ -48,12 +48,13 @@ describe('RegisterNewUserService + UserRepository', () => {
 
   afterEach(async () => {
     const pool = module.get<Pool>(Pool);
-    pool?.query('DELETE FROM users;');
+    await pool.query('DELETE FROM users;');
   });
 
   afterAll(async () => {
     const pool = module.get<Pool>(Pool);
-    pool?.end();
+    await pool.end();
+    await module.close();
   });
 
   it('should be defined', () => {

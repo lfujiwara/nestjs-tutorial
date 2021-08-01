@@ -24,7 +24,13 @@ describe('UserRepository', () => {
 
   afterEach(async () => {
     const pool = module.get<Pool>(Pool);
-    pool?.query('DELETE FROM users;');
+    pool.query('DELETE FROM users;');
+  });
+
+  afterAll(async () => {
+    const pool = module.get<Pool>(Pool);
+    await pool.end();
+    await module.close();
   });
 
   const sampleUserData = {
