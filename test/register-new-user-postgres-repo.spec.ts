@@ -1,3 +1,5 @@
+import * as faker from 'faker';
+
 import {
   RegisterNewUserService,
   RegisterNewUserServiceErrors,
@@ -61,42 +63,41 @@ describe('RegisterNewUserService + UserRepository', () => {
     expect(service).toBeDefined();
   });
 
-  const validInput = {
-    username: 'johndoe',
-    email: 'johndoe@gmail.com',
-    password: 'johndoe123',
+  const makeInput = () => {
+    const firstName = faker.name.firstName();
+    const lastName = faker.name.lastName();
+
+    return {
+      username: faker.internet
+        .userName(firstName, lastName)
+        .replace(/[\W_.]/, ''),
+      email: faker.internet.email(firstName, lastName),
+      password: faker.internet.password(12),
+    };
   };
 
   it('should execute normally with a valid input', async () => {
-    await expect(service.execute({ ...validInput })).resolves.toBeTruthy();
+    await expect(service.execute(makeInput())).resolves.toBeTruthy();
   });
 
   it('should throw an error if the email is already registered', async () => {
-    await service.execute({
-      ...validInput,
-      username: 'johndoe2',
-    });
+    const input1 = makeInput();
+    const input2 = { ...makeInput(), email: input1.email };
 
-    await expect(
-      service.execute({
-        ...validInput,
-      }),
-    ).rejects.toThrowError(
+    await service.execute(input1);
+
+    await expect(service.execute(input2)).rejects.toThrowError(
       RegisterNewUserServiceErrors.EMAIL_ALREADY_REGISTERED,
     );
   });
 
   it('should throw an error if the username is already registered', async () => {
-    await service.execute({
-      ...validInput,
-      email: 'johndoe2@gmail.com',
-    });
+    const input1 = makeInput();
+    const input2 = { ...makeInput(), username: input1.username };
 
-    await expect(
-      service.execute({
-        ...validInput,
-      }),
-    ).rejects.toThrowError(
+    await service.execute(input1);
+
+    await expect(service.execute(input2)).rejects.toThrowError(
       RegisterNewUserServiceErrors.USERNAME_ALREADY_REGISTERED,
     );
   });

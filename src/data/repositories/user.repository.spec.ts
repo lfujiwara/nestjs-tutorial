@@ -1,3 +1,5 @@
+import * as faker from 'faker';
+
 import { Test, TestingModule } from '@nestjs/testing';
 
 import { ConfigModule } from '@nestjs/config';
@@ -33,21 +35,28 @@ describe('UserRepository', () => {
     await module.close();
   });
 
-  const sampleUserData = {
-    username: 'johndoe',
-    password: 'john@doe011',
-    email: 'johndoe@gmail.com',
+  const makeInput = () => {
+    const firstName = faker.name.firstName();
+    const lastName = faker.name.lastName();
+
+    return {
+      username: faker.internet
+        .userName(firstName, lastName)
+        .replace(/[\W_.]/, ''),
+      email: faker.internet.email(firstName, lastName),
+      password: faker.internet.password(12),
+    };
   };
 
   test('Registers an user to the database', async () => {
-    const sampleUser = await User.create(sampleUserData);
+    const sampleUser = await User.create(makeInput());
     await repository.registerNewUser(sampleUser);
 
     expect(sampleUser.id).toBeTruthy();
   });
 
   test('Verify if email is registered', async () => {
-    const sampleUser = await User.create(sampleUserData);
+    const sampleUser = await User.create(makeInput());
 
     await expect(
       repository.isEmailRegistered(sampleUser.email),
@@ -59,7 +68,7 @@ describe('UserRepository', () => {
   });
 
   test('Verify if username is registered', async () => {
-    const sampleUser = await User.create(sampleUserData);
+    const sampleUser = await User.create(makeInput());
 
     await expect(
       repository.isUsernameRegistered(sampleUser.username),
